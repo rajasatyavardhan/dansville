@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Dansvile studio ottawa" },
+      { name: "description", content: "Feel the power of Indian songs with high-energy cinematic folk & Western choreography!" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Dansvile studio ottawa" },
+      { property: "og:description", content: "Feel the power of Indian songs with high-energy cinematic folk & Western choreography!" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Dansvile studio ottawa" },
+      { name: "twitter:description", content: "Feel the power of Indian songs with high-energy cinematic folk & Western choreography!" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/85432ea7-69dd-41f3-990c-dcefa6683c4a" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/85432ea7-69dd-41f3-990c-dcefa6683c4a" },
     ],
     links: [
       {
