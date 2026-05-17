@@ -119,8 +119,8 @@ function Index() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 border border-[var(--neon-pink)] text-[var(--neon-pink)] text-xs font-semibold tracking-widest mb-6 neon-flicker">
               <Sparkles className="size-3" /> LIMITED SPOTS · REGISTER NOW
             </div>
-            <h1 className="font-display text-7xl md:text-9xl leading-none neon-title">
-              DANSVILLA
+            <h1 className="font-display text-5xl md:text-8xl leading-[0.95] neon-title">
+              THE DANSVILLA<br />STUDIO
             </h1>
             <p className="mt-4 text-lg md:text-xl font-semibold tracking-wider text-foreground/90">
               <span className="neon-text-cyan">BOLLYWOOD</span> · <span className="neon-text-pink">TOLLYWOOD</span> · <span className="neon-text-cyan">KOLLYWOOD</span> · <span className="neon-text-pink">FREESTYLE</span>
@@ -128,10 +128,29 @@ function Index() {
             <p className="mt-6 text-base text-muted-foreground max-w-lg">
               Dance classes for every age and every level — taught with energy, heart, and a little bit of filmy magic by Chaitanya Master in Barrhaven, Nepean.
             </p>
+
+            {/* $15 per class highlight */}
+            <div className="mt-8 inline-flex items-stretch rounded-2xl overflow-hidden border-2 border-[var(--neon-gold)] shadow-[0_0_25px_rgba(255,209,102,0.45)] bg-background/60 backdrop-blur">
+              <div className="px-5 py-3 bg-[var(--neon-gold)]/15 flex items-center">
+                <Sparkles className="size-5 text-[var(--neon-gold)]" />
+              </div>
+              <div className="px-5 py-3">
+                <p className="text-[10px] tracking-[0.25em] text-muted-foreground font-semibold">DROP-IN RATE</p>
+                <p className="font-display text-3xl md:text-4xl leading-none" style={{ color: "var(--neon-gold)", textShadow: "0 0 10px var(--neon-gold)" }}>
+                  $15 <span className="text-base text-foreground/80">PER CLASS</span>
+                </p>
+              </div>
+            </div>
+
             <div className="mt-8 flex flex-wrap gap-4">
               <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 beat-pulse">
                   <MessageCircle /> Register on WhatsApp
+                </Button>
+              </a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                <Button size="lg" variant="outline" className="border-[var(--neon-pink)] bg-transparent text-[var(--neon-pink)] hover:bg-[var(--neon-pink)] hover:text-white">
+                  <Instagram /> Instagram
                 </Button>
               </a>
               <a href={`tel:+${PHONE}`}>
@@ -141,15 +160,17 @@ function Index() {
               </a>
             </div>
           </div>
-          <div className="hidden md:flex justify-end">
-            <div className="relative">
+
+          {/* Swipe carousel: studio photos + google reviews */}
+          <div className="flex justify-center md:justify-end">
+            <div className="relative w-full max-w-md">
               <div className="absolute -inset-6 bg-[var(--neon-pink)]/30 blur-3xl rounded-full" />
-              <div className="relative grid grid-cols-2 gap-3 max-w-md">
-                <img src={groupDance} alt="Bollywood group performance" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square translate-y-6 tilt-on-hover" />
-                <img src={teensAdults} alt="Teen adults dance class" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square tilt-on-hover" />
-                <img src={juniors} alt="Junior dancers" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square tilt-on-hover" />
-                <img src={freestyleDance} alt="Freestyle dancer mid-leap" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square translate-y-6 tilt-on-hover" />
+              <div className="relative rounded-3xl overflow-hidden neon-border bg-card">
+                <HeroSwipe />
               </div>
+              <p className="mt-3 text-center text-xs tracking-widest text-muted-foreground">
+                ← SWIPE · STUDIO MOMENTS & REVIEWS →
+              </p>
             </div>
           </div>
         </div>
