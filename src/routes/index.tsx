@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { Phone, MapPin, Instagram, MessageCircle, Star, Music, Users, Heart, Sparkles } from "lucide-react";
+import { Phone, MapPin, Instagram, MessageCircle, Star, Music, Users, Heart, Sparkles, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 import heroDance from "@/assets/hero-dance.jpg";
 import tinyTots from "@/assets/tiny-tots.jpg";
 import juniors from "@/assets/juniors.jpg";
@@ -10,6 +12,10 @@ import teensAdults from "@/assets/teens-adults.jpg";
 import chaitanya from "@/assets/chaitanya.jpg";
 import groupDance from "@/assets/group-dance.jpg";
 import freestyleDance from "@/assets/freestyle-dance.jpg";
+import dansvillaNeon from "@/assets/dansvilla-neon-sign.jpg";
+
+const INSTAGRAM_URL = "https://www.instagram.com/dansvilla_studio/";
+const GOOGLE_REVIEWS_URL = "https://maps.app.goo.gl/Zdo8BycCBqZErtNn8";
 
 const PHONE = "16132189417";
 const wa = (msg: string) => `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
@@ -60,19 +66,28 @@ function Index() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* NAV */}
       <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="#top" className="font-display text-2xl tracking-widest neon-text-pink">DANSVILLA</a>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-3">
+          <a href="#top" className="flex items-center gap-2 shrink-0">
+            <img src={dansvillaNeon} alt="The Dansvilla Studio neon sign" width={120} height={48} className="h-9 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_var(--neon-pink)]" />
+          </a>
           <nav className="hidden md:flex gap-8 text-sm font-medium">
             <a href="#schedule" className="hover:text-[var(--neon-cyan)] transition">Schedule</a>
             <a href="#pricing" className="hover:text-[var(--neon-cyan)] transition">Pricing</a>
             <a href="#about" className="hover:text-[var(--neon-cyan)] transition">About</a>
             <a href="#contact" className="hover:text-[var(--neon-cyan)] transition">Contact</a>
           </nav>
-          <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer">
-            <Button className="bg-[oklch(0.65_0.18_150)] hover:bg-[oklch(0.6_0.18_150)] text-white beat-pulse">
-              <MessageCircle className="size-4" /> WhatsApp
-            </Button>
-          </a>
+          <div className="flex items-center gap-2">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <Button size="icon" variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-pink)] hover:bg-[var(--neon-pink)] hover:text-white">
+                <Instagram className="size-4" />
+              </Button>
+            </a>
+            <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+              <Button className="bg-[oklch(0.65_0.18_150)] hover:bg-[oklch(0.6_0.18_150)] text-white beat-pulse">
+                <MessageCircle className="size-4" /> <span className="hidden sm:inline">WhatsApp</span>
+              </Button>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -104,8 +119,8 @@ function Index() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 border border-[var(--neon-pink)] text-[var(--neon-pink)] text-xs font-semibold tracking-widest mb-6 neon-flicker">
               <Sparkles className="size-3" /> LIMITED SPOTS · REGISTER NOW
             </div>
-            <h1 className="font-display text-7xl md:text-9xl leading-none neon-title">
-              DANSVILLA
+            <h1 className="font-display text-5xl md:text-8xl leading-[0.95] neon-title">
+              THE DANSVILLA<br />STUDIO
             </h1>
             <p className="mt-4 text-lg md:text-xl font-semibold tracking-wider text-foreground/90">
               <span className="neon-text-cyan">BOLLYWOOD</span> · <span className="neon-text-pink">TOLLYWOOD</span> · <span className="neon-text-cyan">KOLLYWOOD</span> · <span className="neon-text-pink">FREESTYLE</span>
@@ -113,10 +128,29 @@ function Index() {
             <p className="mt-6 text-base text-muted-foreground max-w-lg">
               Dance classes for every age and every level — taught with energy, heart, and a little bit of filmy magic by Chaitanya Master in Barrhaven, Nepean.
             </p>
+
+            {/* $15 per class highlight */}
+            <div className="mt-8 inline-flex items-stretch rounded-2xl overflow-hidden border-2 border-[var(--neon-gold)] shadow-[0_0_25px_rgba(255,209,102,0.45)] bg-background/60 backdrop-blur">
+              <div className="px-5 py-3 bg-[var(--neon-gold)]/15 flex items-center">
+                <Sparkles className="size-5 text-[var(--neon-gold)]" />
+              </div>
+              <div className="px-5 py-3">
+                <p className="text-[10px] tracking-[0.25em] text-muted-foreground font-semibold">DROP-IN RATE</p>
+                <p className="font-display text-3xl md:text-4xl leading-none" style={{ color: "var(--neon-gold)", textShadow: "0 0 10px var(--neon-gold)" }}>
+                  $15 <span className="text-base text-foreground/80">PER CLASS</span>
+                </p>
+              </div>
+            </div>
+
             <div className="mt-8 flex flex-wrap gap-4">
               <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 beat-pulse">
                   <MessageCircle /> Register on WhatsApp
+                </Button>
+              </a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+                <Button size="lg" variant="outline" className="border-[var(--neon-pink)] bg-transparent text-[var(--neon-pink)] hover:bg-[var(--neon-pink)] hover:text-white">
+                  <Instagram /> Instagram
                 </Button>
               </a>
               <a href={`tel:+${PHONE}`}>
@@ -126,15 +160,17 @@ function Index() {
               </a>
             </div>
           </div>
-          <div className="hidden md:flex justify-end">
-            <div className="relative">
+
+          {/* Swipe carousel: studio photos + google reviews */}
+          <div className="flex justify-center md:justify-end">
+            <div className="relative w-full max-w-md">
               <div className="absolute -inset-6 bg-[var(--neon-pink)]/30 blur-3xl rounded-full" />
-              <div className="relative grid grid-cols-2 gap-3 max-w-md">
-                <img src={groupDance} alt="Bollywood group performance" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square translate-y-6 tilt-on-hover" />
-                <img src={teensAdults} alt="Teen adults dance class" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square tilt-on-hover" />
-                <img src={juniors} alt="Junior dancers" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square tilt-on-hover" />
-                <img src={freestyleDance} alt="Freestyle dancer mid-leap" loading="lazy" width={400} height={400} className="rounded-2xl object-cover aspect-square translate-y-6 tilt-on-hover" />
+              <div className="relative rounded-3xl overflow-hidden neon-border bg-card">
+                <HeroSwipe />
               </div>
+              <p className="mt-3 text-center text-xs tracking-widest text-muted-foreground">
+                ← SWIPE · STUDIO MOMENTS & REVIEWS →
+              </p>
             </div>
           </div>
         </div>
@@ -161,39 +197,54 @@ function Index() {
       {/* SCHEDULE */}
       <section id="schedule" className="py-24 px-6 reveal-on-scroll">
         <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="Saturday Sessions" title="DANCE WITH US" subtitle="Four batches every Saturday — find the one that fits you." />
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-            <BatchCard img={tinyTots} time="11–12 PM" name="Tiny Tots" age="Ages 3–7" />
-            <BatchCard img={juniors} time="12–1 PM" name="Juniors" age="Ages 8–12" />
-            <BatchCard img={teensAdults} time="1–2 PM" name="Teens & Adults" age="Beginner · 13+" />
-            <BatchCard img={groupDance} time="2–3 PM" name="Teens & Adults" age="Advanced · 13+" />
+          <SectionTitle eyebrow="Class Schedule" title="DANCE WITH US" subtitle="Weekday and weekend batches for every age." />
+
+          {/* Weekend Batches */}
+          <div className="mt-14">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)] border border-[var(--neon-cyan)]">WEEKEND BATCHES</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-[var(--neon-cyan)]/60 to-transparent" />
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <BatchCard img={tinyTots} time="11–12 PM" name="Tiny Tots" age="Ages 3–7" />
+              <BatchCard img={juniors} time="12–1 PM" name="Juniors" age="Ages 8–12" />
+              <BatchCard img={teensAdults} time="1–2 PM" name="Teens & Adults" age="Beginner · 13+" />
+              <BatchCard img={groupDance} time="2–3 PM" name="Teens & Adults" age="Advanced · 13+" />
+            </div>
           </div>
 
-          <div className="mt-16 grid md:grid-cols-2 gap-6">
-            <Card className="p-8 bg-card border-border tilt-on-hover">
-              <div className="flex items-center gap-3 mb-2">
-                <Music className="text-[var(--neon-pink)]" />
-                <h3 className="text-2xl">Monday — Bollywood</h3>
-              </div>
-              <p className="text-muted-foreground mb-4">High-energy Bollywood choreography across three age batches.</p>
-              <ul className="space-y-2 text-sm">
-                <li className="flex justify-between border-b border-border pb-2"><span>Tiny Tots (3–7)</span><span className="neon-text-cyan">5–6 PM</span></li>
-                <li className="flex justify-between border-b border-border pb-2"><span>Juniors (8–12)</span><span className="neon-text-cyan">6–7 PM</span></li>
-                <li className="flex justify-between"><span>Teens & Adults (13+)</span><span className="neon-text-cyan">7–8 PM</span></li>
-              </ul>
-            </Card>
-            <Card className="p-8 bg-card border-border tilt-on-hover">
-              <div className="flex items-center gap-3 mb-2">
-                <Sparkles className="text-[var(--neon-cyan)]" />
-                <h3 className="text-2xl">Wednesday — Freestyle</h3>
-              </div>
-              <p className="text-muted-foreground mb-4">Hip-hop infused freestyle and contemporary moves.</p>
-              <ul className="space-y-2 text-sm">
-                <li className="flex justify-between border-b border-border pb-2"><span>Tiny Tots (3–7)</span><span className="neon-text-pink">5–6 PM</span></li>
-                <li className="flex justify-between border-b border-border pb-2"><span>Juniors (8–12)</span><span className="neon-text-pink">6–7 PM</span></li>
-                <li className="flex justify-between"><span>Teens & Adults (13+)</span><span className="neon-text-pink">7–8 PM</span></li>
-              </ul>
-            </Card>
+          {/* Weekday Batches */}
+          <div className="mt-16">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-[var(--neon-pink)]/15 text-[var(--neon-pink)] border border-[var(--neon-pink)]">WEEKDAY BATCHES</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-[var(--neon-pink)]/60 to-transparent" />
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-8 bg-card border-border tilt-on-hover">
+                <div className="flex items-center gap-3 mb-2">
+                  <Music className="text-[var(--neon-pink)]" />
+                  <h3 className="text-2xl">Monday — Bollywood</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">High-energy Bollywood choreography across three age batches.</p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex justify-between border-b border-border pb-2"><span>Tiny Tots (3–7)</span><span className="neon-text-cyan">5–6 PM</span></li>
+                  <li className="flex justify-between border-b border-border pb-2"><span>Juniors (8–12)</span><span className="neon-text-cyan">6–7 PM</span></li>
+                  <li className="flex justify-between"><span>Teens & Adults (13+)</span><span className="neon-text-cyan">7–8 PM</span></li>
+                </ul>
+              </Card>
+              <Card className="p-8 bg-card border-border tilt-on-hover">
+                <div className="flex items-center gap-3 mb-2">
+                  <Sparkles className="text-[var(--neon-cyan)]" />
+                  <h3 className="text-2xl">Wednesday — Freestyle</h3>
+                </div>
+                <p className="text-muted-foreground mb-4">Hip-hop infused freestyle and contemporary moves.</p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex justify-between border-b border-border pb-2"><span>Tiny Tots (3–7)</span><span className="neon-text-pink">5–6 PM</span></li>
+                  <li className="flex justify-between border-b border-border pb-2"><span>Juniors (8–12)</span><span className="neon-text-pink">6–7 PM</span></li>
+                  <li className="flex justify-between"><span>Teens & Adults (13+)</span><span className="neon-text-pink">7–8 PM</span></li>
+                </ul>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
@@ -238,9 +289,16 @@ function Index() {
         <div className="max-w-7xl mx-auto">
           <SectionTitle eyebrow="Loved by Families" title="WHAT STUDENTS SAY" subtitle="Our 5★ Google rating, in their words." />
           <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <Testimonial quote="Chaitanya Master is incredibly patient and energetic. My daughter loves every Saturday class — she dances around the house all week!" name="Parent · Tiny Tots" />
+            <Testimonial quote="Chaitanya Master is incredibly patient and energetic. My daughter loves every class — she dances around the house all week!" name="Parent · Tiny Tots" />
             <Testimonial quote="Best dance studio in Barrhaven. The choreography is fresh, the vibe is fun, and you genuinely improve. Highly recommend." name="Adult Student" />
             <Testimonial quote="Joined as a complete beginner. Within a few months I was performing on stage with confidence. Thank you Dansvilla!" name="Teen Student" />
+          </div>
+          <div className="mt-10 text-center">
+            <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background">
+                <Star className="size-4" /> More reviews on Google <ExternalLink className="size-3" />
+              </Button>
+            </a>
           </div>
         </div>
       </section>
@@ -323,7 +381,7 @@ function Index() {
       {/* FOOTER */}
       <footer className="py-10 px-6 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p className="font-display text-2xl neon-text-pink tracking-widest">DANSVILLA</p>
+          <img src={dansvillaNeon} alt="The Dansvilla Studio" width={140} height={56} className="h-10 w-auto object-contain drop-shadow-[0_0_10px_var(--neon-pink)]" />
           <p>© {new Date().getFullYear()} Dansvilla Studio · Nepean, Ontario</p>
           <div className="flex gap-4">
             <a href="https://www.instagram.com/dansvilla_studio/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--neon-pink)]"><Instagram className="size-5" /></a>
@@ -416,3 +474,55 @@ function Testimonial({ quote, name }: { quote: string; name: string }) {
     </Card>
   );
 }
+
+function HeroSwipe() {
+  const slides: Array<
+    | { type: "photo"; src: string; alt: string; caption: string }
+    | { type: "review"; quote: string; name: string }
+  > = [
+    { type: "photo", src: groupDance, alt: "Bollywood group performance at Dansvilla Studio", caption: "Group performance · @dansvilla_studio" },
+    { type: "review", quote: "Chaitanya Master is incredibly patient and the kids LOVE his classes. Best studio in Barrhaven!", name: "Google Review · ★★★★★" },
+    { type: "photo", src: freestyleDance, alt: "Freestyle dancer mid-leap", caption: "Freestyle batch · @dansvilla_studio" },
+    { type: "review", quote: "Amazing energy, brilliant choreography. My daughter cannot wait for every class.", name: "Google Review · ★★★★★" },
+    { type: "photo", src: teensAdults, alt: "Teens and adults dance class", caption: "Teens & Adults · @dansvilla_studio" },
+    { type: "review", quote: "Joined as a complete beginner — felt welcomed from day one. Highly recommend!", name: "Google Review · ★★★★★" },
+  ];
+
+  return (
+    <Carousel
+      opts={{ loop: true, align: "start" }}
+      plugins={[Autoplay({ delay: 3800, stopOnInteraction: false, stopOnMouseEnter: true })]}
+      className="w-full"
+    >
+      <CarouselContent>
+        {slides.map((s, i) => (
+          <CarouselItem key={i} className="basis-full">
+            {s.type === "photo" ? (
+              <div className="relative aspect-square w-full">
+                <img src={s.src} alt={s.alt} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-background/90 to-transparent">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Instagram className="size-4 text-[var(--neon-pink)]" />
+                    <span className="text-foreground/90 font-medium">{s.caption}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="relative aspect-square w-full flex flex-col justify-center p-6 md:p-8 bg-gradient-to-br from-[var(--neon-pink)]/15 via-card to-[var(--neon-cyan)]/15">
+                <div className="flex gap-1 text-[var(--neon-gold)] mb-3" style={{ filter: "drop-shadow(0 0 6px var(--neon-gold))" }}>
+                  {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="size-4 fill-current" />)}
+                </div>
+                <p className="text-foreground/95 italic leading-relaxed text-base md:text-lg">"{s.quote}"</p>
+                <p className="mt-4 text-xs font-semibold neon-text-cyan tracking-widest">{s.name}</p>
+                <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[var(--neon-cyan)] w-fit">
+                  Read on Google <ExternalLink className="size-3" />
+                </a>
+              </div>
+            )}
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
+  );
+}
+
