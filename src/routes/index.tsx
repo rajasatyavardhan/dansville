@@ -314,7 +314,40 @@ function Index() {
         </div>
       </section>
 
-      {/* ABOUT CHAITANYA */}
+      {/* GALLERY (masonry) */}
+      <section id="gallery" className="py-24 px-6 reveal-on-scroll">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle eyebrow="Studio Moments" title="GALLERY" subtitle="Real photos, videos and reels from our classes & performances." />
+          <Gallery />
+          <div className="mt-10 text-center">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background">
+                <Instagram className="size-4" /> See more on @dansvilla_studio
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div className="neon-divider mx-6 md:mx-24" />
+
+      {/* EVENTS */}
+      <section id="events" className="py-24 px-6 bg-secondary/40 reveal-on-scroll">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle eyebrow="On Stage" title="EVENTS & SANGEETHS" subtitle="From private sangeeth choreography to community showcases — we bring your celebration to life." />
+          <Events />
+          <div className="mt-10 text-center">
+            <a href={wa("Hi Chaitanya Master, I'd like to book Dansvilla Studio for a Sangeeth / event choreography. Please share details.")} target="_blank" rel="noopener noreferrer">
+              <Button className="bg-primary beat-pulse">
+                <MessageCircle /> Book an Event / Sangeeth
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div className="neon-divider mx-6 md:mx-24" />
+
       <section id="about" className="py-24 px-6 reveal-on-scroll">
         <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-10 items-center">
           <div className="md:col-span-2 relative">
