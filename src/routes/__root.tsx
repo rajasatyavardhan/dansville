@@ -82,8 +82,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Dansvile studio ottawa" },
       { name: "twitter:description", content: "Feel the power of Indian songs with high-energy cinematic folk & Western choreography!" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/85432ea7-69dd-41f3-990c-dcefa6683c4a" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/85432ea7-69dd-41f3-990c-dcefa6683c4a" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/8BoWIuVx9pZc0x3yzNFosIi5Rc32/social-images/social-1779078083050-0aa8f9a2-773e-4f3d-b195-ae504f55c069.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/8BoWIuVx9pZc0x3yzNFosIi5Rc32/social-images/social-1779078083050-0aa8f9a2-773e-4f3d-b195-ae504f55c069.webp" },
     ],
     links: [
       {
