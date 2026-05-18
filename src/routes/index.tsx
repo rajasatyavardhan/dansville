@@ -1,11 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { Phone, MapPin, Instagram, MessageCircle, Star, Music, Users, Heart, Sparkles, ExternalLink } from "lucide-react";
+import { Phone, MapPin, Instagram, MessageCircle, Star, Music, Users, Heart, Sparkles, ExternalLink, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import heroDance from "@/assets/hero-dance.jpg";
+import { InstagramEmbed } from "@/components/InstagramEmbed";
+import { useMedia } from "@/hooks/use-media";
 import tinyTots from "@/assets/tiny-tots.jpg";
 import juniors from "@/assets/juniors.jpg";
 import teensAdults from "@/assets/teens-adults.jpg";
@@ -13,6 +14,11 @@ import chaitanya from "@/assets/chaitanya.jpg";
 import groupDance from "@/assets/group-dance.jpg";
 import freestyleDance from "@/assets/freestyle-dance.jpg";
 import dansvillaNeon from "@/assets/dansvilla-neon-sign.jpg";
+
+// Real Instagram posts from @dansvilla_studio — add more URLs here anytime
+const INSTAGRAM_POSTS: string[] = [
+  "https://www.instagram.com/dansvilla_studio/p/DKTCr8jpj29/",
+];
 
 const INSTAGRAM_URL = "https://www.instagram.com/dansvilla_studio/";
 const GOOGLE_REVIEWS_URL = "https://maps.app.goo.gl/Zdo8BycCBqZErtNn8";
@@ -70,9 +76,11 @@ function Index() {
           <a href="#top" className="flex items-center gap-2 shrink-0">
             <img src={dansvillaNeon} alt="The Dansvilla Studio neon sign" width={120} height={48} className="h-9 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_var(--neon-pink)]" />
           </a>
-          <nav className="hidden md:flex gap-8 text-sm font-medium">
+          <nav className="hidden md:flex gap-6 text-sm font-medium">
             <a href="#schedule" className="hover:text-[var(--neon-cyan)] transition">Schedule</a>
             <a href="#pricing" className="hover:text-[var(--neon-cyan)] transition">Pricing</a>
+            <a href="#gallery" className="hover:text-[var(--neon-cyan)] transition">Gallery</a>
+            <a href="#events" className="hover:text-[var(--neon-cyan)] transition">Events</a>
             <a href="#about" className="hover:text-[var(--neon-cyan)] transition">About</a>
             <a href="#contact" className="hover:text-[var(--neon-cyan)] transition">Contact</a>
           </nav>
@@ -93,10 +101,15 @@ function Index() {
 
       {/* HERO */}
       <section id="top" ref={heroRef} className="relative pt-16 min-h-screen flex items-center overflow-hidden">
-        <img src={heroDance} alt="Dansvilla Studio dancers" width={1920} height={1080}
-          className="absolute inset-0 w-full h-full object-cover opacity-40" />
-        <div className="absolute inset-0" style={{ background: "var(--gradient-hero)", mixBlendMode: "multiply" }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        {/* clean dark background — no AI photo, no filters */}
+        <div className="absolute inset-0 bg-background" />
+        <div
+          className="absolute inset-0 opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle at 20% 20%, rgba(255,43,209,0.18), transparent 50%), radial-gradient(circle at 80% 70%, rgba(0,229,255,0.15), transparent 55%)",
+          }}
+        />
         <div className="absolute inset-0 spotlight" />
 
         {/* Floating music notes */}
@@ -303,7 +316,40 @@ function Index() {
         </div>
       </section>
 
-      {/* ABOUT CHAITANYA */}
+      {/* GALLERY (masonry) */}
+      <section id="gallery" className="py-24 px-6 reveal-on-scroll">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle eyebrow="Studio Moments" title="GALLERY" subtitle="Real photos, videos and reels from our classes & performances." />
+          <Gallery />
+          <div className="mt-10 text-center">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background">
+                <Instagram className="size-4" /> See more on @dansvilla_studio
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div className="neon-divider mx-6 md:mx-24" />
+
+      {/* EVENTS */}
+      <section id="events" className="py-24 px-6 bg-secondary/40 reveal-on-scroll">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle eyebrow="On Stage" title="EVENTS & SANGEETHS" subtitle="From private sangeeth choreography to community showcases — we bring your celebration to life." />
+          <Events />
+          <div className="mt-10 text-center">
+            <a href={wa("Hi Chaitanya Master, I'd like to book Dansvilla Studio for a Sangeeth / event choreography. Please share details.")} target="_blank" rel="noopener noreferrer">
+              <Button className="bg-primary beat-pulse">
+                <MessageCircle /> Book an Event / Sangeeth
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div className="neon-divider mx-6 md:mx-24" />
+
       <section id="about" className="py-24 px-6 reveal-on-scroll">
         <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-10 items-center">
           <div className="md:col-span-2 relative">
@@ -382,7 +428,7 @@ function Index() {
       <footer className="py-10 px-6 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <img src={dansvillaNeon} alt="The Dansvilla Studio" width={140} height={56} className="h-10 w-auto object-contain drop-shadow-[0_0_10px_var(--neon-pink)]" />
-          <p>© {new Date().getFullYear()} Dansvilla Studio · Nepean, Ontario</p>
+          <p>© {new Date().getFullYear()} Dansvilla Studio · Nepean, Ontario · <Link to="/admin" className="hover:text-[var(--neon-cyan)] opacity-60">Admin</Link></p>
           <div className="flex gap-4">
             <a href="https://www.instagram.com/dansvilla_studio/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--neon-pink)]"><Instagram className="size-5" /></a>
             <a href={`tel:+${PHONE}`} className="hover:text-[var(--neon-cyan)]"><Phone className="size-5" /></a>
@@ -476,36 +522,57 @@ function Testimonial({ quote, name }: { quote: string; name: string }) {
 }
 
 function HeroSwipe() {
-  const slides: Array<
-    | { type: "photo"; src: string; alt: string; caption: string }
+  const { items: heroMedia } = useMedia("hero");
+
+  type Slide =
+    | { type: "media"; src: string; mediaType: string; caption: string }
     | { type: "review"; quote: string; name: string }
-  > = [
-    { type: "photo", src: groupDance, alt: "Bollywood group performance at Dansvilla Studio", caption: "Group performance · @dansvilla_studio" },
+    | { type: "ig"; url: string };
+
+  const reviewSlides: Slide[] = [
     { type: "review", quote: "Chaitanya Master is incredibly patient and the kids LOVE his classes. Best studio in Barrhaven!", name: "Google Review · ★★★★★" },
-    { type: "photo", src: freestyleDance, alt: "Freestyle dancer mid-leap", caption: "Freestyle batch · @dansvilla_studio" },
     { type: "review", quote: "Amazing energy, brilliant choreography. My daughter cannot wait for every class.", name: "Google Review · ★★★★★" },
-    { type: "photo", src: teensAdults, alt: "Teens and adults dance class", caption: "Teens & Adults · @dansvilla_studio" },
     { type: "review", quote: "Joined as a complete beginner — felt welcomed from day one. Highly recommend!", name: "Google Review · ★★★★★" },
   ];
+
+  const mediaSlides: Slide[] = heroMedia.map((m) => ({
+    type: "media" as const,
+    src: m.publicUrl,
+    mediaType: m.media_type,
+    caption: m.caption ?? "Dansvilla Studio",
+  }));
+
+  const igSlides: Slide[] = INSTAGRAM_POSTS.map((url) => ({ type: "ig" as const, url }));
+
+  // Interleave: uploaded > reviews > ig
+  const slides: Slide[] = [...mediaSlides, ...reviewSlides, ...igSlides];
 
   return (
     <Carousel
       opts={{ loop: true, align: "start" }}
-      plugins={[Autoplay({ delay: 3800, stopOnInteraction: false, stopOnMouseEnter: true })]}
+      plugins={[Autoplay({ delay: 4500, stopOnInteraction: false, stopOnMouseEnter: true })]}
       className="w-full"
     >
       <CarouselContent>
         {slides.map((s, i) => (
           <CarouselItem key={i} className="basis-full">
-            {s.type === "photo" ? (
-              <div className="relative aspect-square w-full">
-                <img src={s.src} alt={s.alt} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            {s.type === "media" ? (
+              <div className="relative aspect-square w-full bg-black">
+                {s.mediaType === "video" ? (
+                  <video src={s.src} className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline />
+                ) : (
+                  <img src={s.src} alt={s.caption} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                )}
                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-background/90 to-transparent">
                   <div className="flex items-center gap-2 text-xs">
                     <Instagram className="size-4 text-[var(--neon-pink)]" />
                     <span className="text-foreground/90 font-medium">{s.caption}</span>
                   </div>
                 </div>
+              </div>
+            ) : s.type === "ig" ? (
+              <div className="aspect-square w-full overflow-auto bg-black">
+                <InstagramEmbed url={s.url} caption="View on Instagram" />
               </div>
             ) : (
               <div className="relative aspect-square w-full flex flex-col justify-center p-6 md:p-8 bg-gradient-to-br from-[var(--neon-pink)]/15 via-card to-[var(--neon-cyan)]/15">
@@ -523,6 +590,77 @@ function HeroSwipe() {
         ))}
       </CarouselContent>
     </Carousel>
+  );
+}
+
+function Gallery() {
+  const { items } = useMedia("gallery");
+  const hasUploads = items.length > 0;
+  return (
+    <div className="mt-12">
+      {hasUploads && (
+        <div className="masonry">
+          {items.map((m) => (
+            <div key={m.id} className="masonry-item rounded-xl overflow-hidden border border-border bg-card tilt-on-hover">
+              {m.media_type === "video" ? (
+                <video src={m.publicUrl} className="w-full h-auto block" controls playsInline />
+              ) : (
+                <img src={m.publicUrl} alt={m.caption ?? "Dansvilla Studio"} loading="lazy" className="w-full h-auto block" />
+              )}
+              {m.caption && <p className="px-3 py-2 text-xs text-muted-foreground">{m.caption}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+      {INSTAGRAM_POSTS.length > 0 && (
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-3 gap-6 ${hasUploads ? "mt-8" : ""}`}>
+          {INSTAGRAM_POSTS.map((url) => (
+            <div key={url} className="rounded-xl overflow-hidden border border-border bg-card">
+              <InstagramEmbed url={url} />
+            </div>
+          ))}
+        </div>
+      )}
+      {!hasUploads && INSTAGRAM_POSTS.length === 0 && (
+        <p className="text-center text-muted-foreground mt-12">Photos coming soon — Master will add them via the admin panel.</p>
+      )}
+    </div>
+  );
+}
+
+function Events() {
+  const { items } = useMedia("events");
+  const placeholders = [
+    { title: "Sangeeth Choreography", desc: "Custom choreography for the bride, groom, family and friends — performance-ready in just a few sessions.", icon: <Heart /> },
+    { title: "Stage Performances", desc: "Annual showcases and community events featuring our students across all age groups.", icon: <Star /> },
+    { title: "Private Events", desc: "Birthdays, anniversaries and cultural celebrations — bring Dansvilla energy to your special day.", icon: <Calendar /> },
+  ];
+  return (
+    <div className="mt-12 space-y-10">
+      {items.length > 0 && (
+        <div className="masonry">
+          {items.map((m) => (
+            <div key={m.id} className="masonry-item rounded-xl overflow-hidden border border-border bg-card tilt-on-hover">
+              {m.media_type === "video" ? (
+                <video src={m.publicUrl} className="w-full h-auto block" controls playsInline />
+              ) : (
+                <img src={m.publicUrl} alt={m.caption ?? "Event"} loading="lazy" className="w-full h-auto block" />
+              )}
+              {m.caption && <p className="px-3 py-2 text-xs text-muted-foreground">{m.caption}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="grid md:grid-cols-3 gap-6">
+        {placeholders.map((p) => (
+          <Card key={p.title} className="p-6 bg-card border-border tilt-on-hover">
+            <div className="size-12 rounded-xl bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)] flex items-center justify-center mb-4" style={{ filter: "drop-shadow(0 0 8px var(--neon-cyan))" }}>{p.icon}</div>
+            <h3 className="text-xl mb-2">{p.title}</h3>
+            <p className="text-sm text-muted-foreground">{p.desc}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 }
 
