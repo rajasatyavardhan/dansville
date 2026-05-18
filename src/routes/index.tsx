@@ -591,3 +591,74 @@ function HeroSwipe() {
   );
 }
 
+function Gallery() {
+  const { items } = useMedia("gallery");
+  const hasUploads = items.length > 0;
+  return (
+    <div className="mt-12">
+      {hasUploads && (
+        <div className="masonry">
+          {items.map((m) => (
+            <div key={m.id} className="masonry-item rounded-xl overflow-hidden border border-border bg-card tilt-on-hover">
+              {m.media_type === "video" ? (
+                <video src={m.publicUrl} className="w-full h-auto block" controls playsInline />
+              ) : (
+                <img src={m.publicUrl} alt={m.caption ?? "Dansvilla Studio"} loading="lazy" className="w-full h-auto block" />
+              )}
+              {m.caption && <p className="px-3 py-2 text-xs text-muted-foreground">{m.caption}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+      {INSTAGRAM_POSTS.length > 0 && (
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-3 gap-6 ${hasUploads ? "mt-8" : ""}`}>
+          {INSTAGRAM_POSTS.map((url) => (
+            <div key={url} className="rounded-xl overflow-hidden border border-border bg-card">
+              <InstagramEmbed url={url} />
+            </div>
+          ))}
+        </div>
+      )}
+      {!hasUploads && INSTAGRAM_POSTS.length === 0 && (
+        <p className="text-center text-muted-foreground mt-12">Photos coming soon — Master will add them via the admin panel.</p>
+      )}
+    </div>
+  );
+}
+
+function Events() {
+  const { items } = useMedia("events");
+  const placeholders = [
+    { title: "Sangeeth Choreography", desc: "Custom choreography for the bride, groom, family and friends — performance-ready in just a few sessions.", icon: <Heart /> },
+    { title: "Stage Performances", desc: "Annual showcases and community events featuring our students across all age groups.", icon: <Star /> },
+    { title: "Private Events", desc: "Birthdays, anniversaries and cultural celebrations — bring Dansvilla energy to your special day.", icon: <Calendar /> },
+  ];
+  return (
+    <div className="mt-12 space-y-10">
+      {items.length > 0 && (
+        <div className="masonry">
+          {items.map((m) => (
+            <div key={m.id} className="masonry-item rounded-xl overflow-hidden border border-border bg-card tilt-on-hover">
+              {m.media_type === "video" ? (
+                <video src={m.publicUrl} className="w-full h-auto block" controls playsInline />
+              ) : (
+                <img src={m.publicUrl} alt={m.caption ?? "Event"} loading="lazy" className="w-full h-auto block" />
+              )}
+              {m.caption && <p className="px-3 py-2 text-xs text-muted-foreground">{m.caption}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="grid md:grid-cols-3 gap-6">
+        {placeholders.map((p) => (
+          <Card key={p.title} className="p-6 bg-card border-border tilt-on-hover">
+            <div className="size-12 rounded-xl bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)] flex items-center justify-center mb-4" style={{ filter: "drop-shadow(0 0 8px var(--neon-cyan))" }}>{p.icon}</div>
+            <h3 className="text-xl mb-2">{p.title}</h3>
+            <p className="text-sm text-muted-foreground">{p.desc}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
