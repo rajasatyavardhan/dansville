@@ -1,666 +1,624 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
-import { Phone, MapPin, Instagram, MessageCircle, Star, Music, Users, Heart, Sparkles, ExternalLink, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { InstagramEmbed } from "@/components/InstagramEmbed";
+import { useEffect, useMemo, useState } from "react";
+import { Instagram, MessageCircle, Phone } from "lucide-react";
 import { useMedia } from "@/hooks/use-media";
-import tinyTots from "@/assets/tiny-tots.jpg";
-import juniors from "@/assets/juniors.jpg";
-import teensAdults from "@/assets/teens-adults.jpg";
-import chaitanya from "@/assets/chaitanya.jpg";
-import groupDance from "@/assets/group-dance.jpg";
-import freestyleDance from "@/assets/freestyle-dance.jpg";
 import dansvillaNeon from "@/assets/dansvilla-neon-sign.jpg";
-
-// Real Instagram posts from @dansvilla_studio — add more URLs here anytime
-const INSTAGRAM_POSTS: string[] = [
-  "https://www.instagram.com/dansvilla_studio/p/DKTCr8jpj29/",
-];
+import chaitanya from "@/assets/chaitanya.jpg";
 
 const INSTAGRAM_URL = "https://www.instagram.com/dansvilla_studio/";
 const GOOGLE_REVIEWS_URL = "https://maps.app.goo.gl/Zdo8BycCBqZErtNn8";
-
 const PHONE = "16132189417";
 const wa = (msg: string) => `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
 
 const MSG = {
   general: "Hi Chaitanya Master, I'm interested in joining Dansvilla Studio dance classes.",
+  dropIn: "Hi Chaitanya Master, I'd like to book a $15 drop-in class at Dansvilla Studio.",
   monthly: "Hi Chaitanya Master, I'd like to register for the Monthly plan ($60/month). Please share next steps.",
   threeMonths: "Hi Chaitanya Master, I'd like to register for the 3-Month plan ($150 total). Please share next steps.",
-  family: "Hi Chaitanya Master, I'd like to register for the Family/Duo plan ($50/person/month). We are 2 people joining together. Please share next steps.",
+  family: "Hi Chaitanya Master, I'd like to register for the Family/Duo plan ($50/person/month). We are 2 people joining together.",
   about: "Hi Chaitanya Master, I'd love to know more about your classes at Dansvilla Studio.",
+  event: "Hi Chaitanya Master, I'd like to book Dansvilla Studio for a Sangeeth / event choreography. Please share details.",
   batch: (name: string, time: string, age: string) =>
     `Hi Chaitanya Master, I'd like to register for the ${name} batch (${time}, ${age}) at Dansvilla Studio.`,
 };
+
+const REVIEWS = [
+  { name: "Priya S.", initial: "P", date: "2 months ago", text: "Chaitanya Master is incredibly patient and the kids LOVE his classes. Best studio in Barrhaven by far!" },
+  { name: "Anjali R.", initial: "A", date: "1 month ago", text: "Amazing energy, brilliant choreography. My daughter cannot wait for every class." },
+  { name: "Karthik M.", initial: "K", date: "3 weeks ago", text: "Joined as a complete beginner — felt welcomed from day one. The vibe is fun and you genuinely improve." },
+  { name: "Meera V.", initial: "M", date: "1 week ago", text: "Performed at our Sangeeth thanks to Master's choreography. Everyone was blown away. Highly recommend." },
+];
 
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Dansvilla Studio — Bollywood, Tollywood & Freestyle Dance Classes in Nepean" },
-      { name: "description", content: "Join Dansvilla Studio in Barrhaven/Nepean for Bollywood, Tollywood, Kollywood & Freestyle dance classes for kids, teens & adults. Limited spots — register now." },
-      { property: "og:title", content: "Dansvilla Studio — Dance Classes in Nepean" },
+      { title: "The Dansvilla Studio — Bollywood, Freestyle & more | Nepean, Ottawa" },
+      { name: "description", content: "Join Dansvilla Studio in Barrhaven/Nepean for Bollywood, Tollywood, Kollywood & Freestyle dance classes for kids, teens & adults. $15/class. Limited spots — register now." },
+      { property: "og:title", content: "The Dansvilla Studio — Dance Classes in Nepean" },
       { property: "og:description", content: "Bollywood · Tollywood · Kollywood · Freestyle. All ages welcome." },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&family=Dancing+Script:wght@700&display=swap" },
     ],
   }),
 });
 
 function Index() {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    <div className="dv-root">
+      <Nav menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+      <Hero />
+      <HeroCarousel />
+      <GoogleReviews />
+      <Ticker />
+      <Schedule />
+      <Pricing />
+      <Gallery />
+      <Events />
+      <About />
+      <Contact />
+      <Footer />
+    </div>
+  );
+}
+
+/* ---------- NAV ---------- */
+function Nav({ menuOpen, setMenuOpen }: { menuOpen: boolean; setMenuOpen: (v: boolean) => void }) {
+  const links = [
+    ["schedule", "Schedule"], ["pricing", "Pricing"], ["gallery", "Gallery"],
+    ["events", "Events"], ["about", "About"], ["contact", "Contact"],
+  ] as const;
+  const scrollTo = (id: string) => {
+    setMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+  return (
+    <>
+      <nav className="dv-nav">
+        <a href="#top" className="dv-nav-logo" onClick={(e) => { e.preventDefault(); scrollTo("top"); }}>DANSVILLA</a>
+        <ul className="dv-nav-links">
+          {links.map(([id, label]) => (
+            <li key={id}><a href={`#${id}`} onClick={(e) => { e.preventDefault(); scrollTo(id); }}>{label}</a></li>
+          ))}
+        </ul>
+        <div className="dv-nav-icons">
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <Instagram size={17} />
+          </a>
+          <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="wa">
+            <MessageCircle size={17} />
+          </a>
+          <button className="dv-hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
+            <span /><span /><span />
+          </button>
+        </div>
+      </nav>
+      <div className={`dv-mobile-menu ${menuOpen ? "open" : ""}`}>
+        {links.map(([id, label]) => (
+          <a key={id} href={`#${id}`} onClick={(e) => { e.preventDefault(); scrollTo(id); }}>{label}</a>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ---------- HERO ---------- */
+function Hero() {
+  return (
+    <section id="top" className="dv-hero">
+      <div className="dv-hero-bg" style={{ backgroundImage: `url(${dansvillaNeon})` }} />
+      <div className="dv-hero-content">
+        <div className="dv-hero-badge">⚡ LIMITED SPOTS · REGISTER NOW</div>
+        <span className="dv-hero-the">— The —</span>
+        <h1 className="dv-hero-title">DANSVILLA</h1>
+        <div className="dv-hero-studio">STUDIO</div>
+        <p className="dv-hero-styles">BOLLYWOOD · TOLLYWOOD · KOLLYWOOD · FREESTYLE</p>
+        <div className="dv-hero-price">⚡ DROP-IN RATE&nbsp;<span>$15 PER CLASS</span></div>
+        <p className="dv-hero-desc">
+          Dance classes for every age and every level — taught with energy,<br />
+          heart, and a little bit of filmy magic by Chaitanya Master in Barrhaven, Nepean.
+        </p>
+        <div className="dv-hero-btns">
+          <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" className="dv-btn-primary">
+            <MessageCircle size={16} /> Register on WhatsApp
+          </a>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="dv-btn-outline">
+            <Instagram size={16} /> Follow on Instagram
+          </a>
+          <a href={`tel:+${PHONE}`} className="dv-btn-outline" style={{ borderColor: "var(--dv-pink)", color: "var(--dv-pink)" }}>
+            <Phone size={16} /> 613-218-9417
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- HERO CAROUSEL: photos (from admin uploads) + reviews ---------- */
+function HeroCarousel() {
+  const { items: heroMedia } = useMedia("hero");
+  type Slide =
+    | { kind: "photo"; src: string; mediaType: string; caption: string; id: string }
+    | { kind: "review"; quote: string; name: string; id: string };
+
+  const slides: Slide[] = useMemo(() => {
+    const photos: Slide[] = heroMedia.map((m) => ({
+      kind: "photo", src: m.publicUrl, mediaType: m.media_type, caption: m.caption ?? "Dansvilla Studio", id: m.id,
+    }));
+    const reviews: Slide[] = REVIEWS.slice(0, 3).map((r, i) => ({
+      kind: "review", quote: r.text, name: `${r.name} · ★★★★★`, id: `rv-${i}`,
+    }));
+    // Interleave photo, review, photo, review...
+    const out: Slide[] = [];
+    const max = Math.max(photos.length, reviews.length);
+    for (let i = 0; i < max; i++) {
+      if (photos[i]) out.push(photos[i]);
+      if (reviews[i]) out.push(reviews[i]);
+    }
+    // Fallback if no photos
+    if (photos.length === 0) return reviews;
+    return out;
+  }, [heroMedia]);
+
+  const [index, setIndex] = useState(0);
+  const count = slides.length;
 
   useEffect(() => {
-    const el = heroRef.current;
-    if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      el.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    el.addEventListener("mousemove", onMove);
-    return () => el.removeEventListener("mousemove", onMove);
-  }, []);
+    if (count < 2) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % count), 4500);
+    return () => clearInterval(id);
+  }, [count]);
 
+  if (count === 0) return null;
+
+  const prev = () => setIndex((i) => (i - 1 + count) % count);
+  const next = () => setIndex((i) => (i + 1) % count);
+
+  // Slide width approx: 280px photo or 300px review + 20 gap. Use 320 avg for translate.
+  const slideStep = 320;
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* NAV */}
-      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-3">
-          <a href="#top" className="flex items-center gap-2 shrink-0">
-            <img src={dansvillaNeon} alt="The Dansvilla Studio neon sign" width={120} height={48} className="h-9 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_var(--neon-pink)]" />
-          </a>
-          <nav className="hidden md:flex gap-6 text-sm font-medium">
-            <a href="#schedule" className="hover:text-[var(--neon-cyan)] transition">Schedule</a>
-            <a href="#pricing" className="hover:text-[var(--neon-cyan)] transition">Pricing</a>
-            <a href="#gallery" className="hover:text-[var(--neon-cyan)] transition">Gallery</a>
-            <a href="#events" className="hover:text-[var(--neon-cyan)] transition">Events</a>
-            <a href="#about" className="hover:text-[var(--neon-cyan)] transition">About</a>
-            <a href="#contact" className="hover:text-[var(--neon-cyan)] transition">Contact</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-              <Button size="icon" variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-pink)] hover:bg-[var(--neon-pink)] hover:text-white">
-                <Instagram className="size-4" />
-              </Button>
-            </a>
-            <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-              <Button className="bg-[oklch(0.65_0.18_150)] hover:bg-[oklch(0.6_0.18_150)] text-white beat-pulse">
-                <MessageCircle className="size-4" /> <span className="hidden sm:inline">WhatsApp</span>
-              </Button>
-            </a>
-          </div>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section id="top" ref={heroRef} className="relative pt-16 min-h-screen flex items-center overflow-hidden">
-        {/* clean dark background — no AI photo, no filters */}
-        <div className="absolute inset-0 bg-background" />
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            background:
-              "radial-gradient(circle at 20% 20%, rgba(255,43,209,0.18), transparent 50%), radial-gradient(circle at 80% 70%, rgba(0,229,255,0.15), transparent 55%)",
-          }}
-        />
-        <div className="absolute inset-0 spotlight" />
-
-        {/* Floating music notes */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Music
-              key={i}
-              className="floating-note size-6"
-              style={{
-                left: `${(i * 13 + 5) % 95}%`,
-                animationDuration: `${10 + (i % 4) * 3}s`,
-                animationDelay: `${i * 1.5}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 border border-[var(--neon-pink)] text-[var(--neon-pink)] text-xs font-semibold tracking-widest mb-6 neon-flicker">
-              <Sparkles className="size-3" /> LIMITED SPOTS · REGISTER NOW
-            </div>
-            <h1 className="font-display text-5xl md:text-8xl leading-[0.95] neon-title">
-              THE DANSVILLA<br />STUDIO
-            </h1>
-            <p className="mt-4 text-lg md:text-xl font-semibold tracking-wider text-foreground/90">
-              <span className="neon-text-cyan">BOLLYWOOD</span> · <span className="neon-text-pink">TOLLYWOOD</span> · <span className="neon-text-cyan">KOLLYWOOD</span> · <span className="neon-text-pink">FREESTYLE</span>
-            </p>
-            <p className="mt-6 text-base text-muted-foreground max-w-lg">
-              Dance classes for every age and every level — taught with energy, heart, and a little bit of filmy magic by Chaitanya Master in Barrhaven, Nepean.
-            </p>
-
-            {/* $15 per class highlight */}
-            <div className="mt-8 inline-flex items-stretch rounded-2xl overflow-hidden border-2 border-[var(--neon-gold)] shadow-[0_0_25px_rgba(255,209,102,0.45)] bg-background/60 backdrop-blur">
-              <div className="px-5 py-3 bg-[var(--neon-gold)]/15 flex items-center">
-                <Sparkles className="size-5 text-[var(--neon-gold)]" />
-              </div>
-              <div className="px-5 py-3">
-                <p className="text-[10px] tracking-[0.25em] text-muted-foreground font-semibold">DROP-IN RATE</p>
-                <p className="font-display text-3xl md:text-4xl leading-none" style={{ color: "var(--neon-gold)", textShadow: "0 0 10px var(--neon-gold)" }}>
-                  $15 <span className="text-base text-foreground/80">PER CLASS</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-4">
-              <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 beat-pulse">
-                  <MessageCircle /> Register on WhatsApp
-                </Button>
-              </a>
-              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="border-[var(--neon-pink)] bg-transparent text-[var(--neon-pink)] hover:bg-[var(--neon-pink)] hover:text-white">
-                  <Instagram /> Instagram
-                </Button>
-              </a>
-              <a href={`tel:+${PHONE}`}>
-                <Button size="lg" variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background">
-                  <Phone /> 613-218-9417
-                </Button>
-              </a>
-            </div>
-          </div>
-
-          {/* Swipe carousel: studio photos + google reviews */}
-          <div className="flex justify-center md:justify-end">
-            <div className="relative w-full max-w-md">
-              <div className="absolute -inset-6 bg-[var(--neon-pink)]/30 blur-3xl rounded-full" />
-              <div className="relative rounded-3xl overflow-hidden neon-border bg-card">
-                <HeroSwipe />
-              </div>
-              <p className="mt-3 text-center text-xs tracking-widest text-muted-foreground">
-                ← SWIPE · STUDIO MOMENTS & REVIEWS →
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* MARQUEE */}
-      <div className="relative py-5 border-y border-[var(--neon-pink)]/40 bg-background/60 overflow-hidden">
-        <div className="neon-divider absolute top-0 inset-x-0" />
-        <div className="neon-divider absolute bottom-0 inset-x-0" />
-        <div className="marquee-track font-display text-3xl md:text-5xl tracking-widest">
-          {Array.from({ length: 2 }).map((_, k) => (
-            <span key={k} className="flex items-center gap-8 px-4">
-              {["BOLLYWOOD", "TOLLYWOOD", "KOLLYWOOD", "FREESTYLE", "DANSVILLA", "BOLLYWOOD", "TOLLYWOOD", "KOLLYWOOD", "FREESTYLE", "DANSVILLA"].map((w, i) => (
-                <span key={i} className="flex items-center gap-8">
-                  <span className={i % 2 === 0 ? "neon-text-pink" : "neon-text-cyan"}>{w}</span>
-                  <Sparkles className="size-6 text-[var(--neon-gold)]" />
-                </span>
-              ))}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* SCHEDULE */}
-      <section id="schedule" className="py-24 px-6 reveal-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="Class Schedule" title="DANCE WITH US" subtitle="Weekday and weekend batches for every age." />
-
-          {/* Weekend Batches */}
-          <div className="mt-14">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)] border border-[var(--neon-cyan)]">WEEKEND BATCHES</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-[var(--neon-cyan)]/60 to-transparent" />
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <BatchCard img={tinyTots} time="11–12 PM" name="Tiny Tots" age="Ages 3–7" />
-              <BatchCard img={juniors} time="12–1 PM" name="Juniors" age="Ages 8–12" />
-              <BatchCard img={teensAdults} time="1–2 PM" name="Teens & Adults" age="Beginner · 13+" />
-              <BatchCard img={groupDance} time="2–3 PM" name="Teens & Adults" age="Advanced · 13+" />
-            </div>
-          </div>
-
-          {/* Weekday Batches */}
-          <div className="mt-16">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="px-3 py-1 rounded-full text-xs font-bold tracking-widest bg-[var(--neon-pink)]/15 text-[var(--neon-pink)] border border-[var(--neon-pink)]">WEEKDAY BATCHES</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-[var(--neon-pink)]/60 to-transparent" />
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="p-8 bg-card border-border tilt-on-hover">
-                <div className="flex items-center gap-3 mb-2">
-                  <Music className="text-[var(--neon-pink)]" />
-                  <h3 className="text-2xl">Monday — Bollywood</h3>
-                </div>
-                <p className="text-muted-foreground mb-4">High-energy Bollywood choreography across three age batches.</p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex justify-between border-b border-border pb-2"><span>Tiny Tots (3–7)</span><span className="neon-text-cyan">5–6 PM</span></li>
-                  <li className="flex justify-between border-b border-border pb-2"><span>Juniors (8–12)</span><span className="neon-text-cyan">6–7 PM</span></li>
-                  <li className="flex justify-between"><span>Teens & Adults (13+)</span><span className="neon-text-cyan">7–8 PM</span></li>
-                </ul>
-              </Card>
-              <Card className="p-8 bg-card border-border tilt-on-hover">
-                <div className="flex items-center gap-3 mb-2">
-                  <Sparkles className="text-[var(--neon-cyan)]" />
-                  <h3 className="text-2xl">Wednesday — Freestyle</h3>
-                </div>
-                <p className="text-muted-foreground mb-4">Hip-hop infused freestyle and contemporary moves.</p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex justify-between border-b border-border pb-2"><span>Tiny Tots (3–7)</span><span className="neon-text-pink">5–6 PM</span></li>
-                  <li className="flex justify-between border-b border-border pb-2"><span>Juniors (8–12)</span><span className="neon-text-pink">6–7 PM</span></li>
-                  <li className="flex justify-between"><span>Teens & Adults (13+)</span><span className="neon-text-pink">7–8 PM</span></li>
-                </ul>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="neon-divider mx-6 md:mx-24" />
-
-      {/* PRICING */}
-      <section id="pricing" className="py-24 px-6 bg-secondary/40 reveal-on-scroll relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30" style={{
-          background: "radial-gradient(circle at 20% 30%, var(--neon-pink) 0%, transparent 40%), radial-gradient(circle at 80% 70%, var(--neon-cyan) 0%, transparent 40%)"
-        }} />
-        <div className="max-w-7xl mx-auto relative">
-          <SectionTitle eyebrow="Pricing" title="SIMPLE & FAIR" subtitle="Pick what works for your family." />
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <PriceCard title="Monthly" price="$60" sub="/ month" perks={["4 classes per month", "One dance style", "Cancel anytime"]} waMessage={MSG.monthly} />
-            <PriceCard title="3 Months" price="$150" sub="total · save $30" perks={["12 classes (3 months)", "Best value", "One dance style"]} highlighted badge="MOST POPULAR" waMessage={MSG.threeMonths} />
-            <PriceCard title="Family / Duo" price="$50" sub="/ person / month" perks={["Siblings · Parent & Child · Couples", "Valid when 2 join together", "Save together, dance together"]} icon={<Heart className="size-5" />} waMessage={MSG.family} />
-          </div>
-          <p className="text-center text-sm text-muted-foreground mt-8">All prices in CAD. Limited spots available each session.</p>
-        </div>
-      </section>
-
-      {/* WHY US */}
-      <section className="py-24 px-6 reveal-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="Why Dansvilla" title="MORE THAN A CLASS" />
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <Benefit icon={<Users />} title="All Ages, All Levels" desc="From 3-year-olds to grown-ups — everyone has a batch." />
-            <Benefit icon={<Music />} title="4 Dance Styles" desc="Bollywood, Tollywood, Kollywood and Freestyle under one roof." />
-            <Benefit icon={<Heart />} title="Family Friendly" desc="Bring a sibling, a child, or your partner and save together." />
-            <Benefit icon={<Sparkles />} title="Beginner Welcome" desc="No prior experience needed — just show up and have fun." />
-            <Benefit icon={<Star />} title="5★ Rated Studio" desc="Loved by our students and their families on Google." />
-            <Benefit icon={<MapPin />} title="Right in Barrhaven" desc="Easy to reach — 131 Harbour View St, Nepean." />
-          </div>
-        </div>
-      </section>
-
-      <div className="neon-divider mx-6 md:mx-24" />
-
-      {/* TESTIMONIALS */}
-      <section className="py-24 px-6 bg-secondary/40 reveal-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="Loved by Families" title="WHAT STUDENTS SAY" subtitle="Our 5★ Google rating, in their words." />
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <Testimonial quote="Chaitanya Master is incredibly patient and energetic. My daughter loves every class — she dances around the house all week!" name="Parent · Tiny Tots" />
-            <Testimonial quote="Best dance studio in Barrhaven. The choreography is fresh, the vibe is fun, and you genuinely improve. Highly recommend." name="Adult Student" />
-            <Testimonial quote="Joined as a complete beginner. Within a few months I was performing on stage with confidence. Thank you Dansvilla!" name="Teen Student" />
-          </div>
-          <div className="mt-10 text-center">
-            <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background">
-                <Star className="size-4" /> More reviews on Google <ExternalLink className="size-3" />
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* GALLERY (masonry) */}
-      <section id="gallery" className="py-24 px-6 reveal-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="Studio Moments" title="GALLERY" subtitle="Real photos, videos and reels from our classes & performances." />
-          <Gallery />
-          <div className="mt-10 text-center">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background">
-                <Instagram className="size-4" /> See more on @dansvilla_studio
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <div className="neon-divider mx-6 md:mx-24" />
-
-      {/* EVENTS */}
-      <section id="events" className="py-24 px-6 bg-secondary/40 reveal-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="On Stage" title="EVENTS & SANGEETHS" subtitle="From private sangeeth choreography to community showcases — we bring your celebration to life." />
-          <Events />
-          <div className="mt-10 text-center">
-            <a href={wa("Hi Chaitanya Master, I'd like to book Dansvilla Studio for a Sangeeth / event choreography. Please share details.")} target="_blank" rel="noopener noreferrer">
-              <Button className="bg-primary beat-pulse">
-                <MessageCircle /> Book an Event / Sangeeth
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <div className="neon-divider mx-6 md:mx-24" />
-
-      <section id="about" className="py-24 px-6 reveal-on-scroll">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-10 items-center">
-          <div className="md:col-span-2 relative">
-            <div className="absolute -inset-4 bg-[var(--neon-pink)]/40 blur-3xl rounded-full" />
-            <img src={chaitanya} alt="Chaitanya Master, founder of Dansvilla Studio" loading="lazy" width={600} height={600}
-              className="relative rounded-3xl object-cover aspect-square w-full neon-border" />
-          </div>
-          <div className="md:col-span-3">
-            <p className="neon-text-cyan text-xs font-semibold tracking-widest mb-3">MEET YOUR INSTRUCTOR</p>
-            <h2 className="text-5xl md:text-6xl">CHAITANYA <span className="neon-text-pink">MASTER</span></h2>
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-              Chaitanya Master is the heart and energy behind Dansvilla Studio. With years of experience choreographing across Bollywood, Tollywood, Kollywood and freestyle styles, he's known for making every student — whether 3 or 53 — feel like a star on the floor.
-            </p>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              His classes blend technique, expression and a whole lot of fun. Expect crisp choreography, encouraging vibes, and stage-ready confidence by the end of every season.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <a href={wa(MSG.about)} target="_blank" rel="noopener noreferrer">
-                <Button className="bg-primary hover:bg-primary/90 beat-pulse"><MessageCircle /> Message Chaitanya Master</Button>
-              </a>
-              <a href="https://www.instagram.com/dansvilla_studio/" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="neon-cyan-border bg-transparent text-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)] hover:text-background"><Instagram /> Follow on Instagram</Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section id="contact" className="py-24 px-6 bg-secondary/40 reveal-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          <SectionTitle eyebrow="Visit Us" title="COME DANCE WITH US" />
-          <div className="grid md:grid-cols-2 gap-8 mt-12">
-            <Card className="p-8 bg-card border-border space-y-6">
-              <div className="flex items-start gap-4">
-                <MapPin className="text-[var(--neon-pink)] shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-xl mb-1">Studio Location</h3>
-                  <p className="text-muted-foreground">131 Harbour View St, Nepean (Strandherd / Barrhaven), ON K2G 6Z8</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <Phone className="text-[var(--neon-cyan)] shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-xl mb-1">Call Chaitanya Master</h3>
-                  <a href={`tel:+${PHONE}`} className="text-muted-foreground hover:text-[var(--neon-cyan)]">+1 613-218-9417</a>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <Instagram className="text-[var(--neon-pink)] shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-xl mb-1">Instagram</h3>
-                  <a href="https://www.instagram.com/dansvilla_studio/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-[var(--neon-pink)]">@dansvilla_studio</a>
-                </div>
-              </div>
-              <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" className="block">
-                <Button size="lg" className="w-full bg-[oklch(0.65_0.18_150)] hover:bg-[oklch(0.6_0.18_150)] text-white beat-pulse">
-                  <MessageCircle /> Register Now on WhatsApp
-                </Button>
-              </a>
-            </Card>
-            <div className="rounded-xl overflow-hidden neon-cyan-border min-h-[400px]">
-              <iframe
-                title="Dansvilla Studio location"
-                src="https://www.google.com/maps?q=131+Harbour+View+St,+Nepean,+ON+K2G+6Z8&output=embed"
-                className="w-full h-full min-h-[400px]"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="py-10 px-6 border-t border-border">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <img src={dansvillaNeon} alt="The Dansvilla Studio" width={140} height={56} className="h-10 w-auto object-contain drop-shadow-[0_0_10px_var(--neon-pink)]" />
-          <p>© {new Date().getFullYear()} Dansvilla Studio · Nepean, Ontario · <Link to="/admin" className="hover:text-[var(--neon-cyan)] opacity-60">Admin</Link></p>
-          <div className="flex gap-4">
-            <a href="https://www.instagram.com/dansvilla_studio/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--neon-pink)]"><Instagram className="size-5" /></a>
-            <a href={`tel:+${PHONE}`} className="hover:text-[var(--neon-cyan)]"><Phone className="size-5" /></a>
-            <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--neon-pink)]"><MessageCircle className="size-5" /></a>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-function SectionTitle({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
-  return (
-    <div className="text-center max-w-2xl mx-auto">
-      <p className="neon-text-cyan text-xs font-semibold tracking-widest mb-3">{eyebrow.toUpperCase()}</p>
-      <h2 className="text-5xl md:text-6xl">{title}</h2>
-      {subtitle && <p className="mt-4 text-muted-foreground">{subtitle}</p>}
-    </div>
-  );
-}
-
-function BatchCard({ img, time, name, age }: { img: string; time: string; name: string; age: string }) {
-  return (
-    <a
-      href={wa(MSG.batch(name, time, age))}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group relative rounded-2xl overflow-hidden border border-border bg-card block tilt-on-hover"
-    >
-      <img src={img} alt={name} loading="lazy" width={600} height={600} className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition duration-700" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-      <div className="absolute bottom-0 inset-x-0 p-5">
-        <p className="neon-text-cyan font-display text-2xl tracking-wider">{time}</p>
-        <h3 className="text-2xl mt-1">{name}</h3>
-        <p className="text-sm text-muted-foreground">{age}</p>
-        <p className="mt-3 inline-flex items-center gap-1 text-xs font-semibold neon-text-pink opacity-0 group-hover:opacity-100 transition">
-          <MessageCircle className="size-3" /> Register this batch
-        </p>
-      </div>
-    </a>
-  );
-}
-
-function PriceCard({ title, price, sub, perks, highlighted, badge, icon, waMessage }: { title: string; price: string; sub: string; perks: string[]; highlighted?: boolean; badge?: string; icon?: React.ReactNode; waMessage: string }) {
-  return (
-    <Card className={`relative p-8 border-2 transition ${highlighted ? "neon-border bg-card scale-105" : "border-border bg-card hover:neon-cyan-border"}`}>
-      {badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--neon-pink)] text-white text-xs font-bold tracking-widest shadow-[0_0_20px_var(--neon-pink)]">
-          {badge}
-        </div>
-      )}
-      <div className="flex items-center gap-2 neon-text-cyan mb-2">{icon}<p className="text-sm font-semibold tracking-widest uppercase">{title}</p></div>
-      <div className="flex items-baseline gap-2">
-        <span className="font-display text-6xl text-foreground">{price}</span>
-        <span className="text-muted-foreground text-sm">{sub}</span>
-      </div>
-      <ul className="mt-6 space-y-3 text-sm">
-        {perks.map((p) => (
-          <li key={p} className="flex gap-2"><Star className="size-4 text-[var(--neon-gold)] shrink-0 mt-0.5" />{p}</li>
-        ))}
-      </ul>
-      <a href={wa(waMessage)} target="_blank" rel="noopener noreferrer" className="block mt-6">
-        <Button className={`w-full ${highlighted ? "bg-primary hover:bg-primary/90 beat-pulse" : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"}`}>
-          <MessageCircle /> Register {title}
-        </Button>
-      </a>
-    </Card>
-  );
-}
-
-function Benefit({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
-  return (
-    <Card className="p-6 bg-card border-border hover:neon-cyan-border transition tilt-on-hover">
-      <div className="size-12 rounded-xl bg-[var(--neon-pink)]/15 text-[var(--neon-pink)] flex items-center justify-center mb-4" style={{ filter: "drop-shadow(0 0 8px var(--neon-pink))" }}>{icon}</div>
-      <h3 className="text-xl mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground">{desc}</p>
-    </Card>
-  );
-}
-
-function Testimonial({ quote, name }: { quote: string; name: string }) {
-  return (
-    <Card className="p-6 bg-card border-border tilt-on-hover">
-      <div className="flex gap-1 text-[var(--neon-gold)] mb-3" style={{ filter: "drop-shadow(0 0 6px var(--neon-gold))" }}>
-        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-4 fill-current" />)}
-      </div>
-      <p className="text-foreground/90 italic leading-relaxed">"{quote}"</p>
-      <p className="mt-4 text-sm text-muted-foreground font-semibold">— {name}</p>
-    </Card>
-  );
-}
-
-function HeroSwipe() {
-  const { items: heroMedia } = useMedia("hero");
-
-  type Slide =
-    | { type: "media"; src: string; mediaType: string; caption: string }
-    | { type: "review"; quote: string; name: string }
-    | { type: "ig"; url: string };
-
-  const reviewSlides: Slide[] = [
-    { type: "review", quote: "Chaitanya Master is incredibly patient and the kids LOVE his classes. Best studio in Barrhaven!", name: "Google Review · ★★★★★" },
-    { type: "review", quote: "Amazing energy, brilliant choreography. My daughter cannot wait for every class.", name: "Google Review · ★★★★★" },
-    { type: "review", quote: "Joined as a complete beginner — felt welcomed from day one. Highly recommend!", name: "Google Review · ★★★★★" },
-  ];
-
-  const mediaSlides: Slide[] = heroMedia.map((m) => ({
-    type: "media" as const,
-    src: m.publicUrl,
-    mediaType: m.media_type,
-    caption: m.caption ?? "Dansvilla Studio",
-  }));
-
-  const igSlides: Slide[] = INSTAGRAM_POSTS.map((url) => ({ type: "ig" as const, url }));
-
-  // Interleave: uploaded > reviews > ig
-  const slides: Slide[] = [...mediaSlides, ...reviewSlides, ...igSlides];
-
-  return (
-    <Carousel
-      opts={{ loop: true, align: "start" }}
-      plugins={[Autoplay({ delay: 4500, stopOnInteraction: false, stopOnMouseEnter: true })]}
-      className="w-full"
-    >
-      <CarouselContent>
-        {slides.map((s, i) => (
-          <CarouselItem key={i} className="basis-full">
-            {s.type === "media" ? (
-              <div className="relative aspect-square w-full bg-black">
+    <section className="dv-carousel-section">
+      <p className="dv-carousel-label">⭐ Studio Moments & Student Reviews</p>
+      <div className="dv-carousel-wrap">
+        <div className="dv-carousel-track" style={{ transform: `translateX(calc(50% - ${slideStep / 2}px - ${index * slideStep}px))` }}>
+          {slides.map((s) => (
+            s.kind === "photo" ? (
+              <div key={s.id} className="dv-slide photo">
                 {s.mediaType === "video" ? (
-                  <video src={s.src} className="absolute inset-0 w-full h-full object-cover" autoPlay muted loop playsInline />
+                  <video src={s.src} autoPlay muted loop playsInline />
                 ) : (
-                  <img src={s.src} alt={s.caption} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={s.src} alt={s.caption} loading="lazy" />
                 )}
-                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-background/90 to-transparent">
-                  <div className="flex items-center gap-2 text-xs">
-                    <Instagram className="size-4 text-[var(--neon-pink)]" />
-                    <span className="text-foreground/90 font-medium">{s.caption}</span>
-                  </div>
-                </div>
-              </div>
-            ) : s.type === "ig" ? (
-              <div className="aspect-square w-full overflow-auto bg-black">
-                <InstagramEmbed url={s.url} caption="View on Instagram" />
               </div>
             ) : (
-              <div className="relative aspect-square w-full flex flex-col justify-center p-6 md:p-8 bg-gradient-to-br from-[var(--neon-pink)]/15 via-card to-[var(--neon-cyan)]/15">
-                <div className="flex gap-1 text-[var(--neon-gold)] mb-3" style={{ filter: "drop-shadow(0 0 6px var(--neon-gold))" }}>
-                  {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="size-4 fill-current" />)}
+              <div key={s.id} className="dv-slide review">
+                <div>
+                  <div className="dv-cs-stars">★★★★★</div>
+                  <p className="dv-cs-text">"{s.quote}"</p>
                 </div>
-                <p className="text-foreground/95 italic leading-relaxed text-base md:text-lg">"{s.quote}"</p>
-                <p className="mt-4 text-xs font-semibold neon-text-cyan tracking-widest">{s.name}</p>
-                <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[var(--neon-cyan)] w-fit">
-                  Read on Google <ExternalLink className="size-3" />
-                </a>
+                <p className="dv-cs-author">{s.name}</p>
               </div>
-            )}
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-    </Carousel>
+            )
+          ))}
+        </div>
+      </div>
+      <div className="dv-carousel-controls">
+        <button className="dv-carousel-btn" onClick={prev} aria-label="Previous">‹</button>
+        <div className="dv-carousel-dots">
+          {slides.map((_, i) => (
+            <button key={i} className={`dv-carousel-dot ${i === index ? "active" : ""}`} onClick={() => setIndex(i)} aria-label={`Slide ${i + 1}`} />
+          ))}
+        </div>
+        <button className="dv-carousel-btn" onClick={next} aria-label="Next">›</button>
+      </div>
+    </section>
   );
 }
 
-function Gallery() {
-  const { items } = useMedia("gallery");
-  const hasUploads = items.length > 0;
+/* ---------- GOOGLE REVIEWS ---------- */
+function GoogleReviews() {
   return (
-    <div className="mt-12">
-      {hasUploads && (
-        <div className="masonry">
-          {items.map((m) => (
-            <div key={m.id} className="masonry-item rounded-xl overflow-hidden border border-border bg-card tilt-on-hover">
-              {m.media_type === "video" ? (
-                <video src={m.publicUrl} className="w-full h-auto block" controls playsInline />
-              ) : (
-                <img src={m.publicUrl} alt={m.caption ?? "Dansvilla Studio"} loading="lazy" className="w-full h-auto block" />
-              )}
-              {m.caption && <p className="px-3 py-2 text-xs text-muted-foreground">{m.caption}</p>}
+    <section style={{ background: "var(--dv-dark)" }}>
+      <div className="dv-container">
+        <div style={{ textAlign: "center" }}>
+          <p className="dv-section-label">Loved by Families</p>
+          <h2 className="dv-section-title">WHAT STUDENTS SAY</h2>
+          <p className="dv-section-sub" style={{ margin: "0 auto" }}>Our 5★ Google rating, in their words.</p>
+        </div>
+        <div className="dv-gr-grid">
+          {REVIEWS.map((r) => (
+            <div key={r.name} className="dv-gr-card">
+              <div className="dv-gr-top">
+                <div className="dv-gr-avatar">{r.initial}</div>
+                <div style={{ flex: 1 }}>
+                  <div className="dv-gr-name">{r.name}</div>
+                  <div className="dv-gr-stars">★★★★★</div>
+                  <div className="dv-gr-date">{r.date}</div>
+                </div>
+              </div>
+              <p className="dv-gr-text">"{r.text}"</p>
             </div>
           ))}
         </div>
-      )}
-      {INSTAGRAM_POSTS.length > 0 && (
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-3 gap-6 ${hasUploads ? "mt-8" : ""}`}>
-          {INSTAGRAM_POSTS.map((url) => (
-            <div key={url} className="rounded-xl overflow-hidden border border-border bg-card">
-              <InstagramEmbed url={url} />
-            </div>
-          ))}
+        <div className="dv-gr-footer">
+          <span className="dv-gr-footer-text" style={{ fontSize: "0.82rem", color: "var(--dv-muted)" }}>
+            See all reviews on
+          </span>
+          <a className="dv-gr-more" href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer">
+            <span style={{ color: "#4285F4", fontWeight: 900 }}>G</span>
+            <span style={{ color: "#EA4335", fontWeight: 900 }}>o</span>
+            <span style={{ color: "#FBBC05", fontWeight: 900 }}>o</span>
+            <span style={{ color: "#4285F4", fontWeight: 900 }}>g</span>
+            <span style={{ color: "#34A853", fontWeight: 900 }}>l</span>
+            <span style={{ color: "#EA4335", fontWeight: 900 }}>e</span>
+            &nbsp;Reviews →
+          </a>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- TICKER ---------- */
+function Ticker() {
+  const words = ["BOLLYWOOD", "TOLLYWOOD", "KOLLYWOOD", "FREESTYLE", "DANSVILLA"];
+  const line = (
+    <>
+      {Array.from({ length: 6 }).map((_, k) =>
+        words.map((w, i) => (
+          <span key={`${k}-${i}`} style={{ margin: "0 22px" }}>
+            ✦ {w}
+          </span>
+        ))
       )}
-      {!hasUploads && INSTAGRAM_POSTS.length === 0 && (
-        <p className="text-center text-muted-foreground mt-12">Photos coming soon — Master will add them via the admin panel.</p>
-      )}
+    </>
+  );
+  return (
+    <div className="dv-ticker">
+      <div className="dv-ticker-inner">{line}{line}</div>
     </div>
   );
 }
 
+/* ---------- SCHEDULE ---------- */
+function Schedule() {
+  const weekend = [
+    { time: "11–12 PM", name: "Tiny Tots", age: "Ages 3–7" },
+    { time: "12–1 PM", name: "Juniors", age: "Ages 8–12" },
+    { time: "1–2 PM", name: "Teens & Adults Beginner", age: "13+" },
+    { time: "2–3 PM", name: "Teens & Adults Advanced", age: "13+" },
+  ];
+  const monday = [
+    { time: "5–6 PM", name: "Tiny Tots", age: "Ages 3–7" },
+    { time: "6–7 PM", name: "Juniors", age: "Ages 8–12" },
+    { time: "7–8 PM", name: "Teens & Adults", age: "13+" },
+  ];
+  const wednesday = monday;
+
+  return (
+    <section id="schedule" className="dv-schedule">
+      <div className="dv-container" style={{ textAlign: "center" }}>
+        <p className="dv-section-label">Class Schedule</p>
+        <h2 className="dv-section-title">DANCE WITH US</h2>
+        <p className="dv-section-sub" style={{ margin: "0 auto" }}>Weekday and weekend batches for every age.</p>
+      </div>
+      <div className="dv-container">
+        <div className="dv-schedule-grid">
+          <ScheduleCard title="MONDAY" subtitle="BOLLYWOOD" icon="💃" variant="bollywood" batches={monday} />
+          <ScheduleCard title="WEDNESDAY" subtitle="FREESTYLE" icon="⚡" variant="freestyle" batches={wednesday} />
+          <ScheduleCard title="WEEKEND" subtitle="ALL STYLES" icon="🌟" variant="weekend" batches={weekend} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ScheduleCard({ title, subtitle, icon, variant, batches }: {
+  title: string; subtitle: string; icon: string;
+  variant: "bollywood" | "freestyle" | "weekend";
+  batches: { time: string; name: string; age: string }[];
+}) {
+  return (
+    <div className="dv-schedule-card">
+      <div className={`dv-schedule-header ${variant}`}>
+        <div className="dv-schedule-icon">{icon}</div>
+        <div>
+          <div className="dv-schedule-day">{title}</div>
+          <div className="dv-schedule-style">{subtitle}</div>
+        </div>
+      </div>
+      <div className="dv-schedule-batches">
+        {batches.map((b) => (
+          <div key={b.time + b.name} className="dv-batch-row">
+            <div className="dv-batch-time">{b.time}</div>
+            <div className="dv-batch-info">
+              <div className="dv-batch-name">{b.name}</div>
+              <div className="dv-batch-age">{b.age}</div>
+            </div>
+            <a className="dv-wa-batch" href={wa(MSG.batch(b.name, b.time, b.age))} target="_blank" rel="noopener noreferrer">
+              REGISTER
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- PRICING ---------- */
+function Pricing() {
+  return (
+    <section id="pricing" className="dv-pricing">
+      <div className="dv-container" style={{ textAlign: "center" }}>
+        <p className="dv-section-label">Pricing</p>
+        <h2 className="dv-section-title">SIMPLE & FAIR</h2>
+        <p className="dv-section-sub" style={{ margin: "0 auto" }}>Pick what works for your family.</p>
+      </div>
+      <div className="dv-container" style={{ marginTop: 40 }}>
+        <div className="dv-pricing-highlight">
+          <div className="dv-drop-price">$15</div>
+          <div>
+            <div className="dv-drop-label">DROP-IN CLASS</div>
+            <div className="dv-drop-sub">Try a single class · no commitment</div>
+          </div>
+          <a href={wa(MSG.dropIn)} target="_blank" rel="noopener noreferrer" className="dv-btn-primary" style={{ marginLeft: "auto" }}>
+            <MessageCircle size={16} /> Book a Drop-in
+          </a>
+        </div>
+        <div className="dv-pricing-grid">
+          <PriceCard name="Monthly" amount="$60" period="/ month · CAD"
+            features={["4 classes per month", "One dance style", "Cancel anytime"]}
+            ctaMessage={MSG.monthly} />
+          <PriceCard name="3 Months" amount="$150" period="total · CAD"
+            features={["12 classes (3 months)", "Best value", "One dance style"]}
+            badge="MOST POPULAR" save="Save $30" featured ctaMessage={MSG.threeMonths} />
+          <PriceCard name="Family / Duo" amount="$50" period="/ person / month"
+            features={["Siblings · Parent & Child · Couples", "Valid when 2 join together", "Save together, dance together"]}
+            ctaMessage={MSG.family} />
+        </div>
+        <p style={{ textAlign: "center", fontSize: "0.78rem", color: "var(--dv-muted)", marginTop: 24 }}>
+          All prices in CAD. Limited spots each session.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function PriceCard({ name, amount, period, features, badge, save, featured, ctaMessage }: {
+  name: string; amount: string; period: string; features: string[]; badge?: string; save?: string; featured?: boolean; ctaMessage: string;
+}) {
+  return (
+    <div className={`dv-price-card ${featured ? "featured" : ""}`}>
+      {badge && <div className="dv-featured-tag">{badge}</div>}
+      <div className="dv-price-name">{name}</div>
+      <div className="dv-price-amount">{amount}</div>
+      <div className="dv-price-period">{period}</div>
+      {save && <div className="dv-price-save">⚡ {save}</div>}
+      <ul className="dv-price-features">
+        {features.map((f) => <li key={f}>{f}</li>)}
+      </ul>
+      <a href={wa(ctaMessage)} target="_blank" rel="noopener noreferrer" className="dv-btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+        <MessageCircle size={16} /> Register {name}
+      </a>
+    </div>
+  );
+}
+
+/* ---------- GALLERY ---------- */
+function Gallery() {
+  const { items } = useMedia("gallery");
+  return (
+    <section id="gallery" className="dv-gallery-sec">
+      <div className="dv-container">
+        <div className="dv-gallery-header">
+          <div>
+            <p className="dv-section-label">Studio Moments</p>
+            <h2 className="dv-section-title">GALLERY</h2>
+            <p className="dv-section-sub">Real photos & reels from our classes and performances.</p>
+          </div>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="dv-insta-follow">
+            <Instagram size={14} /> Follow @dansvilla_studio
+          </a>
+        </div>
+
+        {items.length > 0 ? (
+          <div className="masonry">
+            {items.map((m) => (
+              <div key={m.id} className="masonry-item" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "var(--dv-card)" }}>
+                {m.media_type === "video" ? (
+                  <video src={m.publicUrl} controls playsInline style={{ width: "100%", display: "block" }} />
+                ) : (
+                  <img src={m.publicUrl} alt={m.caption ?? "Dansvilla"} loading="lazy" style={{ width: "100%", display: "block" }} />
+                )}
+                {m.caption && <p style={{ padding: "8px 12px", fontSize: "0.72rem", color: "var(--dv-muted)" }}>{m.caption}</p>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="dv-gallery-cta">
+            <p>Photos coming soon — Master will add them via the admin panel.</p>
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="dv-insta-follow">
+              <Instagram size={14} /> See us on Instagram
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- EVENTS ---------- */
 function Events() {
   const { items } = useMedia("events");
   const placeholders = [
-    { title: "Sangeeth Choreography", desc: "Custom choreography for the bride, groom, family and friends — performance-ready in just a few sessions.", icon: <Heart /> },
-    { title: "Stage Performances", desc: "Annual showcases and community events featuring our students across all age groups.", icon: <Star /> },
-    { title: "Private Events", desc: "Birthdays, anniversaries and cultural celebrations — bring Dansvilla energy to your special day.", icon: <Calendar /> },
+    { icon: "💍", title: "Sangeeth Choreography", desc: "Custom choreography for the bride, groom, family and friends — performance-ready in just a few sessions." },
+    { icon: "🎤", title: "Stage Performances", desc: "Annual showcases and community events featuring our students across all age groups." },
+    { icon: "🎉", title: "Private Events", desc: "Birthdays, anniversaries and cultural celebrations — bring Dansvilla energy to your special day." },
   ];
   return (
-    <div className="mt-12 space-y-10">
-      {items.length > 0 && (
-        <div className="masonry">
-          {items.map((m) => (
-            <div key={m.id} className="masonry-item rounded-xl overflow-hidden border border-border bg-card tilt-on-hover">
-              {m.media_type === "video" ? (
-                <video src={m.publicUrl} className="w-full h-auto block" controls playsInline />
-              ) : (
-                <img src={m.publicUrl} alt={m.caption ?? "Event"} loading="lazy" className="w-full h-auto block" />
-              )}
-              {m.caption && <p className="px-3 py-2 text-xs text-muted-foreground">{m.caption}</p>}
+    <section id="events" className="dv-events-sec">
+      <div className="dv-container" style={{ textAlign: "center" }}>
+        <p className="dv-section-label">On Stage</p>
+        <h2 className="dv-section-title">EVENTS & SANGEETHS</h2>
+        <p className="dv-section-sub" style={{ margin: "0 auto" }}>From private sangeeth choreography to community showcases — we bring your celebration to life.</p>
+      </div>
+      <div className="dv-container">
+        {items.length > 0 && (
+          <div className="masonry" style={{ marginTop: 32 }}>
+            {items.map((m) => (
+              <div key={m.id} className="masonry-item" style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "var(--dv-card)" }}>
+                {m.media_type === "video" ? (
+                  <video src={m.publicUrl} controls playsInline style={{ width: "100%", display: "block" }} />
+                ) : (
+                  <img src={m.publicUrl} alt={m.caption ?? "Event"} loading="lazy" style={{ width: "100%", display: "block" }} />
+                )}
+                {m.caption && <p style={{ padding: "8px 12px", fontSize: "0.72rem", color: "var(--dv-muted)" }}>{m.caption}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="dv-events-grid">
+          {placeholders.map((p) => (
+            <div key={p.title} className="dv-event-card">
+              <div className="dv-event-icon">{p.icon}</div>
+              <h3 className="dv-event-title">{p.title}</h3>
+              <p className="dv-event-desc">{p.desc}</p>
+              <a href={wa(MSG.event)} target="_blank" rel="noopener noreferrer" className="dv-btn-primary">
+                <MessageCircle size={14} /> Book Now
+              </a>
             </div>
           ))}
         </div>
-      )}
-      <div className="grid md:grid-cols-3 gap-6">
-        {placeholders.map((p) => (
-          <Card key={p.title} className="p-6 bg-card border-border tilt-on-hover">
-            <div className="size-12 rounded-xl bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)] flex items-center justify-center mb-4" style={{ filter: "drop-shadow(0 0 8px var(--neon-cyan))" }}>{p.icon}</div>
-            <h3 className="text-xl mb-2">{p.title}</h3>
-            <p className="text-sm text-muted-foreground">{p.desc}</p>
-          </Card>
-        ))}
       </div>
-    </div>
+    </section>
   );
 }
 
+/* ---------- ABOUT ---------- */
+function About() {
+  return (
+    <section id="about" className="dv-about-sec">
+      <div className="dv-container">
+        <div className="dv-about-grid">
+          <div className="dv-about-img">
+            <img src={chaitanya} alt="Chaitanya Master, founder of Dansvilla Studio" />
+          </div>
+          <div>
+            <p className="dv-section-label">Meet your instructor</p>
+            <h2 className="dv-section-title">CHAITANYA MASTER</h2>
+            <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginTop: 12 }}>
+              Chaitanya Master is the heart and energy behind Dansvilla Studio. With years of experience choreographing across Bollywood, Tollywood, Kollywood and freestyle styles, he's known for making every student — whether 3 or 53 — feel like a star on the floor.
+            </p>
+            <div className="dv-about-features">
+              <div className="dv-about-feat">
+                <div className="dv-about-feat-icon">🎯</div>
+                <div className="dv-about-feat-title">All Ages, All Levels</div>
+                <div className="dv-about-feat-text">From 3-year-olds to grown-ups — everyone has a batch.</div>
+              </div>
+              <div className="dv-about-feat">
+                <div className="dv-about-feat-icon">🎵</div>
+                <div className="dv-about-feat-title">4 Dance Styles</div>
+                <div className="dv-about-feat-text">Bollywood, Tollywood, Kollywood and Freestyle.</div>
+              </div>
+              <div className="dv-about-feat">
+                <div className="dv-about-feat-icon">⭐</div>
+                <div className="dv-about-feat-title">5★ Rated</div>
+                <div className="dv-about-feat-text">Loved by our students and families on Google.</div>
+              </div>
+              <div className="dv-about-feat">
+                <div className="dv-about-feat-icon">📍</div>
+                <div className="dv-about-feat-title">Right in Barrhaven</div>
+                <div className="dv-about-feat-text">131 Harbour View St, Nepean.</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <a href={wa(MSG.about)} target="_blank" rel="noopener noreferrer" className="dv-btn-primary">
+                <MessageCircle size={16} /> Message Master
+              </a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="dv-btn-outline">
+                <Instagram size={16} /> Follow
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- CONTACT ---------- */
+function Contact() {
+  return (
+    <section id="contact" className="dv-contact-sec">
+      <div className="dv-container" style={{ textAlign: "center" }}>
+        <p className="dv-section-label">Visit Us</p>
+        <h2 className="dv-section-title">COME DANCE WITH US</h2>
+      </div>
+      <div className="dv-container">
+        <div className="dv-contact-grid">
+          <div className="dv-contact-info">
+            <div className="dv-contact-item">
+              <div className="dv-contact-icon">📍</div>
+              <div>
+                <div className="dv-contact-label">Studio Location</div>
+                <div className="dv-contact-value">131 Harbour View St, Nepean (Barrhaven), ON K2G 6Z8</div>
+              </div>
+            </div>
+            <div className="dv-contact-item">
+              <div className="dv-contact-icon">📞</div>
+              <div>
+                <div className="dv-contact-label">Call Chaitanya Master</div>
+                <div className="dv-contact-value"><a href={`tel:+${PHONE}`}>+1 613-218-9417</a></div>
+              </div>
+            </div>
+            <div className="dv-contact-item">
+              <div className="dv-contact-icon">📷</div>
+              <div>
+                <div className="dv-contact-label">Instagram</div>
+                <div className="dv-contact-value"><a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">@dansvilla_studio</a></div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 12 }}>
+              <a href={wa(MSG.general)} target="_blank" rel="noopener noreferrer" className="dv-btn-primary" style={{ background: "#25d366", boxShadow: "0 4px 20px rgba(37,211,102,0.4)" }}>
+                <MessageCircle size={16} /> WhatsApp
+              </a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="dv-btn-primary" style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}>
+                <Instagram size={16} /> Instagram
+              </a>
+            </div>
+          </div>
+          <div className="dv-map">
+            <iframe
+              title="Dansvilla Studio location"
+              src="https://www.google.com/maps?q=131+Harbour+View+St,+Nepean,+ON+K2G+6Z8&output=embed"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- FOOTER ---------- */
+function Footer() {
+  return (
+    <footer className="dv-footer">
+      <div className="dv-footer-logo">DANSVILLA</div>
+      <div className="dv-footer-links">
+        <a href="#schedule" onClick={(e) => { e.preventDefault(); document.getElementById("schedule")?.scrollIntoView({ behavior: "smooth" }); }}>Schedule</a>
+        <a href="#pricing" onClick={(e) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); }}>Pricing</a>
+        <a href="#gallery" onClick={(e) => { e.preventDefault(); document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" }); }}>Gallery</a>
+        <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }); }}>Contact</a>
+        <Link to="/admin" style={{ color: "var(--dv-muted)", textDecoration: "none" }}>Admin</Link>
+      </div>
+      <p className="dv-footer-copy">© {new Date().getFullYear()} Dansvilla Studio · Nepean, Ontario</p>
+    </footer>
+  );
+}
